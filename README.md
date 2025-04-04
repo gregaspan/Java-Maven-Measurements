@@ -30,9 +30,9 @@ This is a Jakarta EE-based web application designed to manage products and their
 3.	Deploy the WAR file to your Jakarta EE application server (e.g., WildFly).
 
 Configuration
-	•	Database: The persistence settings are defined in src/main/resources/META-INF/persistence.xml.
-	•	Mail: Email notifications are configured to use the java:jboss/mail/MojMail session.
-	•	Locales: Language resource bundles can be found in src/main/resources/si/messages_en.properties and src/main/resources/si/messages_sl.properties.
+• Database: The persistence settings are defined in src/main/resources/META-INF/persistence.xml.
+• Mail: Email notifications are configured to use the java:jboss/mail/MojMail session.
+• Locales: Language resource bundles can be found in src/main/resources/si/messages_en.properties and src/main/resources/si/messages_sl.properties.
 
 Running the Application
 	•	Access the application via the default welcome page:
