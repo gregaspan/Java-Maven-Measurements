@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core" lang="en">
+<h:head>
+	<meta charset="UTF-8" />
+	<title>Products and Measurements</title>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"/>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script>
+		function toggleUnits() {
+			var unitButton = document.querySelector('.unit-toggle');
+			var currentUnit = document.getElementById('current-unit').textContent;
+			var valueCells = document.querySelectorAll('.value-cell');
+
+			if (currentUnit === 'C') {
+				unitButton.textContent = 'F';
+				document.getElementById('current-unit').textContent = 'F';
+				valueCells.forEach(function(cell) {
+					var celsiusValue = parseFloat(cell.getAttribute('data-value'));
+					var fahrenheitValue = (celsiusValue * 9/5) + 32;
+					cell.textContent = fahrenheitValue.toFixed(2);
+					cell.setAttribute('data-value', fahrenheitValue.toFixed(2));
+				});
+			} else {
+				unitButton.textContent = 'C';
+				document.getElementById('current-unit').textContent = 'C';
+				valueCells.forEach(function(cell) {
+					var fahrenheitValue = parseFloat(cell.getAttribute('data-value'));
+					var celsiusValue = (fahrenheitValue - 32) * 5/9;
+					cell.textContent = celsiusValue.toFixed(2);
+					cell.setAttribute('data-value', celsiusValue.toFixed(2));
+				});
+			}
+		}
+
+		function toggleView(view) {
+			const tableView = document.getElementById('table-view');
+			const graphView = document.getElementById('graph-view');
+
+			if (view === 'graph') {
+				tableView.style.display = 'none';
+				graphView.style.display = 'block';
+			} else {
+				tableView.style.display = 'block';
+				graphView.style.display = 'none';
+			}
+		}
+
+		function drawGraph() {
+			const ctx = document.getElementById('temperatureGraph').getContext('2d');
+			const valueCells = document.querySelectorAll('.value-cell');
+			const temperatures = Array.from(valueCells).map(cell => parseFloat(cell.getAttribute('data-value'))).reverse();
+			const labels = Array.from(valueCells).map(cell => cell.closest('tr').querySelector('td:first-child').textContent).reverse();
+			const minTemp = parseFloat(document.querySelector('#min-temp').textContent);
+			const maxTemp = parseFloat(document.querySelector('#max-temp').textContent);
+
+			const data = {
+				labels: labels,
+				datasets: [{
+					label: 'Temperature',
+					data: temperatures,
+					borderColor: 'rgb(75, 192, 192)',
+					tension: 0.1
+				}, {
+					label: 'Minimum Temperature',
+					data: Array(labels.length).fill(minTemp),
+					borderColor: 'green',
+					borderDash: [5, 5],
+					fill: false
+				}, {
+					label: 'Maximum Temperature',
+					data: Array(labels.length).fill(maxTemp),
+					borderColor: 'green',
+					borderDash: [5, 5],
+					fill: false
+				}]
+			};
+
+			const config = {
+				type: 'line',
+				data: data,
+				options: {
+					scales: {
+						y: {
+							beginAtZero: false,
+						}
+					}
+				}
+			};
+
+			new Chart(ctx, config);
+		}
+
+		document.addEventListener('DOMContentLoaded', drawGraph);
+	</script>
+</h:head>
+<h:body>
+	<div class="container mt-3">
+		<f:view>
+			<h:form>
+				<f:metadata>
+					<f:viewParam name="product" value="#{measurementsapp.productViewParam}" />
+				</f:metadata>
+				<div class="mb-2">
+					<a href="#{facesContext.externalContext.applicationContextPath}/faces/products.xhtml" class="btn btn-link">
+						<h:outputText value="#{msg.Products}"/>
+					</a> |
+					<a href="#{facesContext.externalContext.applicationContextPath}/faces/edit_product.xhtml?product=-1" class="btn btn-link">
+						<h:outputText value="#{msg.AddProducts}"/>
+					</a>
+				</div>
+				<hr />
+				<button type="button" class="btn btn-primary unit-toggle" onclick="toggleUnits()">C</button>
+				<p>Product: <b>#{measurementsapp.currentProduct.name}</b> (Minimum: <span id="min-temp">#{measurementsapp.currentProduct.minMeasure}</span>°C, Maximum: <span id="max-temp">#{measurementsapp.currentProduct.maxMeasure}</span>°C)</p>
+				<div class="mb-2">
+					<button type="button" class="btn btn-outline-primary" onclick="toggleView('table')">Table View</button>
+					<button type="button" class="btn btn-outline-secondary" onclick="toggleView('graph')">Graph View</button>
+					<h:link value="#{msg.AddMeasurement}" outcome="edit_measurement" styleClass="btn btn-primary">
+						<f:param name="product" value="#{measurementsapp.currentProduct.id}" />
+					</h:link>
+				</div>
+				<div id="table-view" style="display: block;">
+					<h:dataTable value="#{measurementsapp.currentProductMeasurements}" var="m" styleClass="table">
+						<h:column>
+							<f:facet name="header">Timestamp</f:facet>
+							#{m.createdString}
+						</h:column>
+						<h:column>
+							<f:facet name="header">Value (°<span id="current-unit">C</span>)</f:facet>
+							<span class="value-cell" data-value="#{m.value}">#{m.value}</span>
+						</h:column>
+						<h:column>
+							<h:outputText value="OK" rendered="#{m.ok}" styleClass="text-success" />
+							<h:outputText value="NOT OK" rendered="#{m.ok eq false}" styleClass="text-danger" />
+						</h:column>
+					</h:dataTable>
+				</div>
+				<div id="graph-view" style="display: none;">
+					<canvas id="temperatureGraph"></canvas>
+				</div>
+			</h:form>
+		</f:view>
+	</div>
+</h:body>
+</html>
