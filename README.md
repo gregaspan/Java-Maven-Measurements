@@ -1,5 +1,3 @@
-Below is a simple and clear README.md for the Measurements Jakarta EE Web App:
-
 # Measurements Jakarta EE Web App
 
 This is a Jakarta EE-based web application designed to manage products and their measurements. It allows users to add new products, record measurements, and view data both in table and graph formats. The application also sends email notifications if a measurement is out of the expected tolerance range.
@@ -29,7 +27,7 @@ This is a Jakarta EE-based web application designed to manage products and their
    ```bash
    mvn clean install
 
-	3.	Deploy the WAR file to your Jakarta EE application server (e.g., WildFly).
+3.	Deploy the WAR file to your Jakarta EE application server (e.g., WildFly).
 
 Configuration
 	•	Database: The persistence settings are defined in src/main/resources/META-INF/persistence.xml.
@@ -40,9 +38,3 @@ Running the Application
 	•	Access the application via the default welcome page:
 
 http://localhost:8080/Measurements/faces/products.xhtml
-
-
-
-Enjoy managing your products and measurements!
-
-This README provides a concise overview of the project's purpose, features, technologies used, and basic setup instructions.
